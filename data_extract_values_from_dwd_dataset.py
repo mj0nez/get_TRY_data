@@ -1,13 +1,15 @@
 import pandas as pd
 from pathlib import Path
 
-# IMPORT parameters
+"""
+IMPORT parameters
+"""
 # PATH_SRC_FILES = Path.cwd()  # current working dir
-PATH_SRC_FILES = 'D:/Master Thesis/Modellentwicklung/TRY_DWD/' \
-                 'product_wgs84_20200626__125716_Kiel_Stadtrand/' \
-                 'TRY_543103100873/'  # '<path of unpacked data set>'
+PATH_SRC_FILES = 'C:\..<path to your directory>'  # of unpacked data set'
 
-# EXPORT parameters
+"""
+EXPORT parameters
+"""
 # EXPORT_PREFIX = 'City_outskirts'
 EXPORT_PREFIX = 'City_center'  # replaces coordinates with distinguishable name
 
@@ -25,7 +27,7 @@ EXPORT_FORMAT = '.txt'
 # EXPORT_FORMAT = '.csv'
 
 
-def readData(file):
+def getColumnVectorFromFile(file: Path, val_to_extract: str) -> pd.DataFrame:
 
     # column names of data set
     columns_src = ['RW', 'HW', 'MM', 'DD', 'HH', 't', 'p', 'WR', 'WG', 'N',
@@ -38,16 +40,19 @@ def readData(file):
     rows_to_skip = head_future if TRY_future in file.name else head_normal
 
     # use python engine, because c engine cant handle 2 sep
-    return pd.read_csv(file,
-                       skiprows=rows_to_skip,
-                       engine='python',
-                       sep=r'\s+',
-                       header=None,
-                       names=columns_src,
-                       dtype=object)
+    df = pd.read_csv(file,
+                     skiprows=rows_to_skip,
+                     engine='python',
+                     sep=r'\s+',
+                     header=None,
+                     names=columns_src,
+                     dtype=object)
+
+    return df[val_to_extract]
 
 
-def getExportPath(export_path, file_prefix, file_name, val_name):
+def getExportPath(export_path: str, file_prefix: str, file_name: str,
+                  val_name: str) -> Path:
 
     name_sep = '_'
 
@@ -59,9 +64,9 @@ def getExportPath(export_path, file_prefix, file_name, val_name):
     return Path(export_path) / Path(export_file_name)
 
 
-def exportAsCSV(data_frame, export_name_path, export_format):
+def exportAsCSV(data_frame: pd.DataFrame, name_path: Path, export_format: str):
 
-    name = export_name_path.with_suffix(export_format)
+    name = name_path.with_suffix(export_format)
     data_frame.to_csv(name,
                       header=None,
                       index=False)
@@ -70,20 +75,25 @@ def exportAsCSV(data_frame, export_name_path, export_format):
 def runExtraction():
     file_ext_src = '.dat'
 
-    for file in list(Path(PATH_SRC_FILES).glob('**/*' + file_ext_src)):
+    matching_files_dir = list(Path(PATH_SRC_FILES).glob('**/*' + file_ext_src))
+    if matching_files_dir is None:
+        print("No matching files in directory...")
+        return
+
+    for file in matching_files_dir:
         # creates PurePath objects from matching files in src folder
 
         print('Extracting data....for value: ', VAL_TO_EXTRACT)
         print('from: ', file.name)
 
-        df = readData(file)
-        df = df[VAL_TO_EXTRACT]
+        values = getColumnVectorFromFile(file, VAL_TO_EXTRACT)
+
         export_path = getExportPath(PATH_FOR_EXPORT,
                                     EXPORT_PREFIX,
                                     file,
                                     VAL_TO_EXTRACT)
 
-        exportAsCSV(df, export_path, EXPORT_FORMAT)
+        exportAsCSV(values, export_path, EXPORT_FORMAT)
 
         print('...exported.\n')
 
