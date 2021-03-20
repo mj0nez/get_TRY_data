@@ -22,12 +22,15 @@ PATH_FOR_EXPORT = PATH_SRC_FILES  # to src folder
 VAL_TO_EXTRACT = 'D'  # diff solar irradiance (horiz. plane) [W/m^2]
 
 EXPORT_FORMAT = '.txt'
-
-
 # EXPORT_FORMAT = '.csv'
 
 
 def readData(file):
+    """
+
+    :param file:
+    :return:
+    """
     # column names of data set
     value_names = ['RW', 'HW', 'MM', 'DD', 'HH', 't', 'p', 'WR', 'WG', 'N',
                    'x', 'RF', 'B', 'D', 'A', 'E', 'IL']
@@ -50,49 +53,57 @@ def readData(file):
 
 
 def getExportPath(export_path, file_prefix, file_name, val_name):
+    """
+
+    :param export_path:
+    :param file_prefix:
+    :param file_name:
+    :param val_name:
+    :return:
+    """
     name_sep = '_'
 
     name_string = file_name.split(name_sep)
     export_file_name = name_sep.join([file_prefix,
                                       name_string[0],
                                       name_string[2],
-                                      val_name])  # w/o coordinates
+                                      val_name])        # w/o coordinates
     return Path(export_path) / Path(export_file_name)
 
 
 def exportCSV(data_frame, export_name_path, export_format):
+    """
+
+    :param data_frame:
+    :param export_name_path:
+    :param export_format:
+    :return:
+    """
     name = export_name_path.with_suffix(export_format)
     data_frame.to_csv(name,
                       header=None,
                       index=False)
-    return
 
 
 def runExtraction():
-    # local vars allow 
-    path_src_folder = PATH_SRC_FILES
     file_ext_src = '.dat'
-    path_for_export = PATH_FOR_EXPORT
-    export_prefix = EXPORT_PREFIX
-    val_to_extract = VAL_TO_EXTRACT
-    export_format = EXPORT_FORMAT
 
-    for file in list(Path(path_src_folder).glob('**/*' + file_ext_src)):
+    for file in list(Path(PATH_SRC_FILES).glob('**/*' + file_ext_src)):
         # creates PurePath objects from matching files in src folder
 
-        print('Extracting data....for value: ', val_to_extract)
+        print('Extracting data....for value: ', VAL_TO_EXTRACT)
         print('from: ', file.name)
 
         df = readData(file)
-        df = df[val_to_extract]  # reduce data to column
-        export_path = getExportPath(path_for_export,
-                                    export_prefix,
+        df = df[VAL_TO_EXTRACT]  # reduce data to column
+        export_path = getExportPath(PATH_FOR_EXPORT,
+                                    EXPORT_PREFIX,
                                     file,
-                                    val_to_extract)
-        exportCSV(df, export_path, export_format)
+                                    VAL_TO_EXTRACT)
+
+        exportCSV(df, export_path, EXPORT_FORMAT)
 
         print('...exported.\n')
-    return
 
 
 if __name__ == '__main__':
