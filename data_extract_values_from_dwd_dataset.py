@@ -9,7 +9,7 @@ PATH_SRC_FILES = 'D:/Master Thesis/Modellentwicklung/TRY_DWD/' \
 
 # EXPORT parameters
 # EXPORT_PREFIX = 'City_outskirts'
-EXPORT_PREFIX = 'City_center'  # replaces coordinates
+EXPORT_PREFIX = 'City_center'  # replaces coordinates with distinguishable name
 
 PATH_FOR_EXPORT = PATH_SRC_FILES  # to src folder
 # PATH_FOR_EXPORT = '<your desired export location>'
@@ -26,20 +26,15 @@ EXPORT_FORMAT = '.txt'
 
 
 def readData(file):
-    """
 
-    :param file:
-    :return:
-    """
     # column names of data set
-    value_names = ['RW', 'HW', 'MM', 'DD', 'HH', 't', 'p', 'WR', 'WG', 'N',
+    columns_src = ['RW', 'HW', 'MM', 'DD', 'HH', 't', 'p', 'WR', 'WG', 'N',
                    'x', 'RF', 'B', 'D', 'A', 'E', 'IL']
 
     TRY_future = 'TRY2045_'  # identifier future data set
     head_future = 36
     head_normal = 34
 
-    # header to skip
     rows_to_skip = head_future if TRY_future in file.name else head_normal
 
     # use python engine, because c engine cant handle 2 sep
@@ -48,19 +43,12 @@ def readData(file):
                        engine='python',
                        sep=r'\s+',
                        header=None,
-                       names=value_names,
+                       names=columns_src,
                        dtype=object)
 
 
 def getExportPath(export_path, file_prefix, file_name, val_name):
-    """
 
-    :param export_path:
-    :param file_prefix:
-    :param file_name:
-    :param val_name:
-    :return:
-    """
     name_sep = '_'
 
     name_string = file_name.split(name_sep)
@@ -71,14 +59,8 @@ def getExportPath(export_path, file_prefix, file_name, val_name):
     return Path(export_path) / Path(export_file_name)
 
 
-def exportCSV(data_frame, export_name_path, export_format):
-    """
+def exportAsCSV(data_frame, export_name_path, export_format):
 
-    :param data_frame:
-    :param export_name_path:
-    :param export_format:
-    :return:
-    """
     name = export_name_path.with_suffix(export_format)
     data_frame.to_csv(name,
                       header=None,
@@ -95,13 +77,13 @@ def runExtraction():
         print('from: ', file.name)
 
         df = readData(file)
-        df = df[VAL_TO_EXTRACT]  # reduce data to column
+        df = df[VAL_TO_EXTRACT]
         export_path = getExportPath(PATH_FOR_EXPORT,
                                     EXPORT_PREFIX,
                                     file,
                                     VAL_TO_EXTRACT)
 
-        exportCSV(df, export_path, EXPORT_FORMAT)
+        exportAsCSV(df, export_path, EXPORT_FORMAT)
 
         print('...exported.\n')
 
