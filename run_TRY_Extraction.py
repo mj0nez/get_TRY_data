@@ -1,4 +1,7 @@
-"""
+""" run_TRY_Extraction
+A script to extract meteorological data from a TRY data set. Implemented to
+ allow fast extractions for multiple scenarios and data sets.
+
 Copyright (c) 2021 mj0nez
 und MIT License
 
@@ -62,7 +65,7 @@ def getColumnVectorFromFile(file: Path, val_to_extract: str) -> pd.DataFrame:
 
     rows_to_skip = head_future if TRY_future in file.name else head_normal
 
-    # use python engine, because c engine cant handle 2 sep
+    # use python engine, because c engine can't handle 2 sep
     df = pd.read_csv(file,
                      skiprows=rows_to_skip,
                      engine='python',
